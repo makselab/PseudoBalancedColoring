@@ -1,5 +1,6 @@
 import igraph as ig
 import pynauty as pynauty
+import pandas as pd
 from collections import defaultdict
 
 from NormalSubgroup import *
@@ -13,10 +14,16 @@ class SymmetryAnalyzer:
 		self.pynauty_graph = self.get_pynauty_graph_from_ig_graph(self.ig_graph)
 		
 		self.generators, grpsize1, grpsize2, orbits, numorbits = pynauty.autgrp(self.pynauty_graph)
+
 		self.permutations = [combinatorics.Permutation(generator) for generator in self.generators]
+		
+		self.nodes = pd.DataFrame({"Name": self.ig_graph.vs["name"],
+								  "Orbit": orbits})
 	
 	def decompose(self):
 		self.sectors = self.get_sectors_from_permutations(self.permutations)
+		self.nodes["Sector"] = self.get_assigned_sectors(self.sectors, self.ig_graph)
+		self.nodes["Orbit"] = self.nodes["Sector"].astype(str) + "_" + self.nodes["Orbit"].astype(str)
 		
 		self.NormalSubgroups = [NormalSubgroup(self.ig_graph, self.sectors[i],
 											   self.get_permutations_on_sector_id(self.permutations,
@@ -106,7 +113,22 @@ class SymmetryAnalyzer:
 			if(is_permutation_on_sector(permutation_cyclic, sector_id)):
 				permutations_to_return.append(permutation)
 		return(permutations_to_return)
-
+		
+	def get_assigned_sectors(self, sectors, ig_graph):
+		sectorId = []
+		for i in ig_graph.vs.indices:
+			search_result = [i in sector for sector in sectors]
+			if (any(search_result) == False):
+				sectorId.append(-1)
+			else:
+				sectorId.append([idx + 1 for idx in range(len(search_result)) if search_result[idx] == True][0])
+		
+		trivialIdx = max(sectorId) + 1
+		for idx in range(len(sectorId)):
+			if sectorId[idx] == -1:
+				sectorId[idx] = trivialIdx
+				trivialIdx = trivialIdx + 1
+		return(sectorId)
 	#############################################################################
 	########################## Calculating indices ##############################
 	#############################################################################
@@ -159,6 +181,9 @@ class SymmetryAnalyzer:
 	################################### Print ###################################
 	#############################################################################
 	def print_all_info(self):
+		nodes = self.nodes.sort_values(by = ["Sector", "Orbit"])
+		print(self.nodes)
+		
 		self.print_indices()
 		print()
 		self.print_normal_subgroups()
@@ -167,6 +192,7 @@ class SymmetryAnalyzer:
 		self.print_indices_to_file(prefix + "_indices.txt")
 		self.print_normal_subgroups_to_file(prefix + "_normal_subgroups.txt")
 		self.print_permutations_to_file(prefix + "_permutations.txt")
+		self.print_nodes_to_file(prefix + "_nodes.txt")
 		self.print_edges_to_file(prefix + "_edges.txt")
 	
 	def print_normal_subgroups(self):
@@ -185,6 +211,10 @@ class SymmetryAnalyzer:
 			filehandle.writelines("%s\n" % self.ig_graph.vs["name"])
 		for NormalSubgroup in self.NormalSubgroups:
 			NormalSubgroup.print_raw_permutations_to_file(fileName)
+	
+	def print_nodes_to_file(self, fileName):
+		nodes = self.nodes.sort_values(by = ["Sector", "Orbit"])
+		nodes.to_csv(fileName, index = False)
 	
 	def print_edges_to_file(self, fileName):
 		edges = self.edges
