@@ -47,6 +47,9 @@ class NormalSubgroup:
 		self.meanEpsilon = mean(self.epsilons)
 		self.maxEpsilon = max(self.epsilons)
 
+	#############################################################################
+	########################### Helping functions ###############################
+	#############################################################################
 	def sympy_permutations_to_sage_group(self, sympy_permutations):
 		subgroup_perms_sage_form = []
 		
@@ -86,6 +89,9 @@ class NormalSubgroup:
 			
 		return(group_name)
 
+	#############################################################################
+	################################### Print ###################################
+	#############################################################################
 	def print(self):
 		print("Class:\n\t", self.classification)
 		print("Mean epsilon = \t", self.meanEpsilon)

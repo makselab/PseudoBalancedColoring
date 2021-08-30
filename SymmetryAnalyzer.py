@@ -25,8 +25,26 @@ class SymmetryAnalyzer:
 		
 		self.calculate_epsilons()
 	
+	def calculate_epsilons(self):
+		for NormalSubgroup in self.NormalSubgroups:
+			NormalSubgroup.calculate_epsilons()
+		
+		meanEpsilons = [NormalSubgroup.meanEpsilon for NormalSubgroup in self.NormalSubgroups]
+		maxEpsilons = [NormalSubgroup.maxEpsilon for NormalSubgroup in self.NormalSubgroups]
+		self.meanEpsilon = mean(meanEpsilons)
+		self.maxEpsilon = max(maxEpsilons)
+	
 	# List of indices (update it every time you change anything as it's used twice in the print info section):
-	# 1 - 
+	# Fiedler value
+	# Normalized Fiedler value
+	# Eigen ratio
+	###### experimental indices:
+	# Random Walk Fiedler Value
+	# Minimal degree
+	# Maximal degree
+	# Sum of degrees
+	# Vertex connectivity
+	# Edge connectivity
 	def calculate_indices(self):
 		self.calculate_fiedler_values()
 		self.calculate_experimental_values()
@@ -88,18 +106,10 @@ class SymmetryAnalyzer:
 			if(is_permutation_on_sector(permutation_cyclic, sector_id)):
 				permutations_to_return.append(permutation)
 		return(permutations_to_return)
+
 	#############################################################################
 	########################## Calculating indices ##############################
 	#############################################################################
-	def calculate_epsilons(self):
-		for NormalSubgroup in self.NormalSubgroups:
-			NormalSubgroup.calculate_epsilons()
-		
-		meanEpsilons = [NormalSubgroup.meanEpsilon for NormalSubgroup in self.NormalSubgroups]
-		maxEpsilons = [NormalSubgroup.maxEpsilon for NormalSubgroup in self.NormalSubgroups]
-		self.meanEpsilon = mean(meanEpsilons)
-		self.maxEpsilon = max(maxEpsilons)
-	
 	def calculate_fiedler_values(self):
 		graph_laplacian = self.ig_graph.laplacian(normalized = False)
 		graph_laplacian = np.array(graph_laplacian)
@@ -144,6 +154,7 @@ class SymmetryAnalyzer:
 		
 		self.vertex_connectivity = self.ig_graph.vertex_connectivity()
 		self.edge_connectivity = self.ig_graph.edge_connectivity()
+
 	#############################################################################
 	################################### Print ###################################
 	#############################################################################
@@ -194,7 +205,7 @@ class SymmetryAnalyzer:
 			filehandle.writelines("Eigen ratio,%s\n" % self.eigenRatio)
 			filehandle.writelines("Mean epsilon,%s\n" % self.meanEpsilon)
 			filehandle.writelines("Max epsilon,%s\n" % self.maxEpsilon)
-			# experimental values from here down
+			# experimental indices from here down
 			filehandle.writelines("Random Walk Fiedler Value,%s\n" % self.randomWalkSecondEigenvalue)
 			filehandle.writelines("Minimal degree,%s\n" % self.minimalDegree)
 			filehandle.writelines("Maximal degree,%s\n" % self.maximalDegree)
