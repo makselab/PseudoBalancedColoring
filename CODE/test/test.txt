@@ -1,0 +1,23 @@
+Edge weight sum: 16.0
+Edge weight lower bound: 16.0
+Node,Color
+a,1
+b,2
+c,3
+d,2
+e,4
+
+Edges added
+b,e,1,1.0
+a,e,1,1.0
+
+Input File
+5
+a c 1
+b c 1
+c e 1
+d e 1
+c d 1
+
+
+Fixed File
