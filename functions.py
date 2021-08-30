@@ -45,7 +45,15 @@ def readEdgeFile(inputFile, sep = "\t", header = None):
 	edges["Color"] = "Original"
 	return(edges)
 
-def runFile(inputFile, outputPrefix):
+def runFile(inputFile):
+	print("Running ", inputFile)
+	edges = parseMIPOutputFile(inputFile)
+	symmetryAnalyzer = SymmetryAnalyzer(edges)
+	symmetryAnalyzer.decompose()
+	symmetryAnalyzer.calculate_indices()
+	symmetryAnalyzer.print_all_info()
+
+def runFile_to_output(inputFile, outputPrefix):
 	print("Running ", inputFile)
 	edges = parseMIPOutputFile(inputFile)
 	symmetryAnalyzer = SymmetryAnalyzer(edges)
@@ -60,4 +68,4 @@ def runFolder(folderToRun, outputFolder):
 	os.makedirs(outputFolder, exist_ok = True)
 	for file in files:
 		prefix = re.sub(r"\.[a-z]{3}$", "", file)
-		runFile(folderToRun + "/" + file, outputFolder + "/" + prefix)
+		runFile_to_output(folderToRun + "/" + file, outputFolder + "/" + prefix)
