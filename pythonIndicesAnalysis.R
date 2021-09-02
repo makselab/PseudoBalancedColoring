@@ -8,7 +8,7 @@ require(tidyr)
 require(dplyr)
 
 getIndexFiles <- function(directoryName, prefix) {
-  directories = list.dirs(paste0("/home/ian/Dropbox (City College)/Research/PhD work/shared folders/PROTEIN-FOLDING/COLLABORATION-ANALYSIS/DAVID-FRANCESCO/FINAL-ANALYSIS-MAY-2021/DATA/", directoryName, "/OUTPUT_TEST/"))
+  directories = list.dirs(paste0(directoryName, "/OUTPUT/"))
   #directories = directories[!grepl("OUTPUT/$", directories)]
   directories = directories[grepl(prefix, directories)]
   
@@ -53,8 +53,8 @@ getIndices <- function(files) {
   return(indices)
 }
 
-getManualIndices <- function(prefix) {
-  manualIndices = read.table("/home/ian/Dropbox (City College)/Research/PhD work/shared folders/PROTEIN-FOLDING/COLLABORATION-ANALYSIS/DAVID-FRANCESCO/FINAL-ANALYSIS-MAY-2021/manualRepairIndices", sep = "\n", stringsAsFactors = F)
+getManualIndices <- function(file, prefix) {
+  manualIndices = read.table(file, sep = "\n", stringsAsFactors = F)
   manualIndices = separate(manualIndices, V1, c("V1", "V2"), sep = "\t")
   if(prefix == "bw") {
     manualIndices = manualIndices[2:15,]
@@ -86,16 +86,17 @@ filterIndices <- function(indices, variables) {
   return(indices)
 }
 
-directoryName = "INTEGER-PROGRAM-COST-EDGES"
+directoryName = "/home/ian/Dropbox (City College)/Research/PhD work/shared folders/PROTEIN-FOLDING/COLLABORATION-ANALYSIS/DAVID-FRANCESCO/FINAL-ANALYSIS-MAY-2021/DATA/INTEGER-PROGRAM-COST-EDGES"
 # directoryName = "HUBS-ONLY-NETWORKS"
 # directoryName = "INTEGER-PROGRAM-COST-ONE-OVER-MAX-DEGREE"
-prefix = "bw"
+prefix = "fw"
+manualIndexFile = "/home/ian/Dropbox (City College)/Research/PhD work/shared folders/PROTEIN-FOLDING/COLLABORATION-ANALYSIS/DAVID-FRANCESCO/FINAL-ANALYSIS-MAY-2021/CODE/manualRepairIndices"
 # variables = c("Number of Trivial Colors", "Number of Non-Trivial Colors", "Number of Nodes in Non-Trivial Colors", "Normalized Fiedler Value", "Mean epsilon", "Critical Eigenvalue Shifted Adjacency")
 variables = c("Number of Non-Trivial Colors", "Number of Trivial Colors", "Number of Nodes in Non-Trivial Colors", "Normalized Fiedler Value", "Max epsilon")
 
 files = getIndexFiles(directoryName, prefix)
 indices = getIndices(files)
-manualIndices = getManualIndices(prefix)
+manualIndices = getManualIndices(manualIndexFile, prefix)
 indices = filterIndices(indices, variables)
 manualIndices = filterIndices(manualIndices, variables)
 
@@ -121,5 +122,5 @@ plotData =
     scale_x_continuous(breaks = 1:17, name = "Number of colors in a repaired graph") +
     scale_y_continuous(name = element_blank())
 plotData
-# ggsave("IndicesSummary.png", plot = plotData, width = 1, height = 2, scale = 10)
+ggsave("IndicesSummary.png", plot = plotData, width = 1, height = 2, scale = 10)
 # ggsave("IndicesSummary.png", plot = plotData, width = 5, height = 2.5, scale = 8)

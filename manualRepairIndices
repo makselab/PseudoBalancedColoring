@@ -1,0 +1,41 @@
+Backward
+
+Number of Trivial Colors	1
+Number of Non-Trivial Colors	7
+Number of Nodes in Non-Trivial Colors	28
+Mean Color Size	3.625
+
+Critical Eigenvalue	2.0000000
+Eigen Ratio	-1.0000000
+Fiedler Value	1.1168159
+Normalized Fiedler Value	0.2190306
+
+Average Path Length	2.0714286
+Average Clustering Coefficient	0.8433172
+Randic Index	9.7985652
+Number Of Repaired Edges	10
+Max epsilon	0.125
+
+NumberOfColors	8
+
+
+
+Forward
+
+Number of Trivial Colors	1
+Number of Non-Trivial Colors	8
+Number of Nodes in Non-Trivial Colors	21
+Mean Color Size	2.444
+
+Critical Eigenvalue	3.1231056
+Eigen Ratio	-0.6096118
+Fiedler Value	4.0000000
+Normalized Fiedler Value	0.5362700
+
+Average Path Length	1.7359307
+Average Clustering Coefficient	0.7930736
+Randic Index	8.5997498
+Number Of Repaired Edges	7
+Max epsilon	0.07575758
+
+NumberOfColors	9
