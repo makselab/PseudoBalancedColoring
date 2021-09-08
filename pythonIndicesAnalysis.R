@@ -21,7 +21,7 @@ getIndexFiles <- function(directoryName, prefix) {
 getIndices <- function(files) {
   indices = foreach(i = 1:length(files), .combine = rbind) %do% {
     ncolors = as.integer(gsub(".*_([0-9]+)_indices.txt", "\\1", files[i]))
-    edgeList = read.table(paste0(gsub("_indices.txt", "_edges.txt", files[i])), stringsAsFactors = F, sep = ",", header = T)
+    edgeList = read.table(paste0(gsub("_indices.txt", "_edges.csv", files[i])), stringsAsFactors = F, sep = ",", header = T)
     balancedColoring = get.balanced.coloring.Kamei(raw_edges = edgeList[, 1:2])
     graph = graph_from_edgelist(as.matrix(edgeList[, 1:2]), directed = F)
     adjacency_matrix = as.matrix(get.adjacency(graph))
