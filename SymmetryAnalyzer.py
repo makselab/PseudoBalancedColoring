@@ -1,6 +1,7 @@
 import igraph as ig
 import pynauty as pynauty
 import pandas as pd
+import sys as sys
 from collections import defaultdict
 
 from NormalSubgroup import *
@@ -14,6 +15,9 @@ class SymmetryAnalyzer:
 		self.pynauty_graph = self.get_pynauty_graph_from_ig_graph(self.ig_graph)
 		
 		self.generators, grpsize1, grpsize2, orbits, numorbits = pynauty.autgrp(self.pynauty_graph)
+		if (len(self.generators) == 0):
+				print("Graph has no automorphisms")
+				sys.exit()
 
 		self.permutations = [combinatorics.Permutation(generator) for generator in self.generators]
 		
