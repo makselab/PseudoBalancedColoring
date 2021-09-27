@@ -6,11 +6,11 @@ from collections import defaultdict
 from NormalSubgroup import *
 
 class SymmetryAnalyzer:
-	def __init__(self, edges):
+	def __init__(self, edges, directed = False):
 		self.edges = edges
 		
 		self.ig_graph = ig.Graph.TupleList(self.edges[["Source", "Target", "Color"]].itertuples(index = False),
-										   directed = False, edge_attrs = "color")
+										   directed = directed, edge_attrs = "color")
 		self.pynauty_graph = self.get_pynauty_graph_from_ig_graph(self.ig_graph)
 		
 		self.generators, grpsize1, grpsize2, orbits, numorbits = pynauty.autgrp(self.pynauty_graph)
@@ -73,7 +73,7 @@ class SymmetryAnalyzer:
 			adjacency_dict[source] = adjacent_nodes
 
 		pynauty_graph = pynauty.Graph(number_of_vertices = ig_graph.vcount(),
-									  directed = False,
+									  directed = ig_graph.is_directed(),
 									  adjacency_dict = adjacency_dict)
 		
 		return(pynauty_graph)
