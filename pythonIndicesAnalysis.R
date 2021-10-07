@@ -37,13 +37,16 @@ getIndices <- function(files) {
     index = rbind(index, c("Number of Nodes in Non-Trivial Colors", nrow(balancedColoring) - sum(table(balancedColoring$Color) == 1)))
     index = rbind(index, c("Critical Eigenvalue Shifted Adjacency", max(quotient_eigenspectrum)))
     index$V3 = ncolors
+    index$V4 = length(unique(balancedColoring$Color))
     
     # add colors to node file
-    nodes = read.table(paste0(gsub("_indices.txt", "_nodes.txt", files[i])), stringsAsFactors = F, sep = ",", header = T)
+    nodes = read.table(paste0(gsub("_indices.txt", "_nodes.csv", files[i])), stringsAsFactors = F, sep = ",", header = T)
+    nodes = nodes[, c("Id", "Label", "Sector", "Orbit")]
+    colnames(balancedColoring)[1] = "Id"
     nodes = merge(nodes, balancedColoring)
     nodes = arrange(nodes, Sector, Orbit)
-    nodes = nodes[, c("Name", "Sector", "Orbit", "Color")]
-    write.table(nodes, paste0(gsub("_indices.txt", "_nodes.txt", files[i])), sep = ",", row.names = F, quote = F)
+    nodes = nodes[, c("Id", "Label", "Sector", "Orbit", "Color")]
+    write.table(nodes, paste0(gsub("_indices.txt", "_nodes.csv", files[i])), sep = ",", row.names = F, quote = F)
     
     return(index)
   }
@@ -88,8 +91,9 @@ filterIndices <- function(indices, variables) {
 
 directoryName = "/home/ian/Dropbox (City College)/Research/PhD work/shared folders/PROTEIN-FOLDING/COLLABORATION-ANALYSIS/DAVID-FRANCESCO/FINAL-ANALYSIS-MAY-2021/DATA/INTEGER-PROGRAM-COST-EDGES"
 # directoryName = "HUBS-ONLY-NETWORKS"
-# directoryName = "INTEGER-PROGRAM-COST-ONE-OVER-MAX-DEGREE"
-prefix = "fw"
+# directoryName = "/home/ian/Dropbox (City College)/Research/PhD work/shared folders/PROTEIN-FOLDING/COLLABORATION-ANALYSIS/DAVID-FRANCESCO/FINAL-ANALYSIS-MAY-2021/DATA/INTEGER-PROGRAM-COST-ONE-OVER-MAX-DEGREE"
+# directoryName = "/home/ian/Dropbox (City College)/Research/PhD work/shared folders/PROTEIN-FOLDING/COLLABORATION-ANALYSIS/DAVID-FRANCESCO/FINAL-ANALYSIS-MAY-2021/DATA/INTEGER-PROGRAM-COST-ONE-OVER-SUM-DEGREES"
+prefix = "c_bw_no"
 manualIndexFile = "/home/ian/Dropbox (City College)/Research/PhD work/shared folders/PROTEIN-FOLDING/COLLABORATION-ANALYSIS/DAVID-FRANCESCO/FINAL-ANALYSIS-MAY-2021/CODE/manualRepairIndices"
 # variables = c("Number of Trivial Colors", "Number of Non-Trivial Colors", "Number of Nodes in Non-Trivial Colors", "Normalized Fiedler Value", "Mean epsilon", "Critical Eigenvalue Shifted Adjacency")
 variables = c("Number of Non-Trivial Colors", "Number of Trivial Colors", "Number of Nodes in Non-Trivial Colors", "Normalized Fiedler Value", "Max epsilon")

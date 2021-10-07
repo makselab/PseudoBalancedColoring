@@ -21,8 +21,9 @@ class SymmetryAnalyzer:
 
 		self.permutations = [combinatorics.Permutation(generator) for generator in self.generators]
 		
-		self.nodes = pd.DataFrame({"Name": self.ig_graph.vs["name"],
-								  "Orbit": orbits})
+		self.nodes = pd.DataFrame({"Id": self.ig_graph.vs["name"],
+                                   "Label": self.ig_graph.vs["name"],
+								   "Orbit": orbits})
 	
 	def decompose(self):
 		self.sectors = self.get_sectors_from_permutations(self.permutations)
