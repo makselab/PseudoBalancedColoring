@@ -29,7 +29,7 @@ def parseMIPOutputFile(inputFile):
 		repairedEdges.columns = ["Source", "Target", "Id", "Weight"]
 		repairedEdges = repairedEdges[["Source", "Target", "Weight"]]
 		repairedEdges[["Source", "Target"]] = [sorted([row[0], row[1]]) for row in repairedEdges.values]
-		repairedEdges = repairedEdges.drop_duplicates()
+		repairedEdges = repairedEdges.drop_duplicates(subset = ["Source", "Target"])
 		repairedEdges["Color"] = "Repaired"
 		edges = pd.concat([originalEdges, repairedEdges])
 	else:
