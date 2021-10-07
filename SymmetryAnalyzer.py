@@ -196,7 +196,7 @@ class SymmetryAnalyzer:
 		self.print_indices_to_file(prefix + "_indices.txt")
 		self.print_normal_subgroups_to_file(prefix + "_normal_subgroups.txt")
 		self.print_permutations_to_file(prefix + "_permutations.txt")
-		self.print_nodes_to_file(prefix + "_nodes.txt")
+		self.print_nodes_to_file(prefix + "_nodes.csv")
 		self.print_edges_to_file(prefix + "_edges.csv")
 	
 	def print_normal_subgroups(self):
