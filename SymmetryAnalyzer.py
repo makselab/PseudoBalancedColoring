@@ -57,8 +57,12 @@ class SymmetryAnalyzer:
 	# Sum of degrees
 	# Vertex connectivity
 	# Edge connectivity
+	# Randic Index
+	# Average path length
+	# Average clustering coefficient (local)
 	def calculate_indices(self):
 		self.calculate_fiedler_values()
+		self.calculate_topological_indices()
 		self.calculate_experimental_values()
 	
 	#############################################################################
@@ -182,6 +186,22 @@ class SymmetryAnalyzer:
 		self.vertex_connectivity = self.ig_graph.vertex_connectivity()
 		self.edge_connectivity = self.ig_graph.edge_connectivity()
 
+	def calculate_topological_indices(self):
+		# Randic Index
+		degrees = self.ig_graph.degree()
+		randic_index = []
+		for i in range(self.ig_graph.vcount()):
+			for j in range(self.ig_graph.vcount()):
+				if(not self.ig_graph.are_connected(i, j)):
+						randic_index.append(1 / (degrees[i] * degrees[j])**(1/2))
+		self.randic_index = sum(randic_index)
+
+		# Average path length
+		self.average_path_length = self.ig_graph.average_path_length()
+
+		# Average clustering coefficient (local)
+		self.average_clustering_coefficient = self.ig_graph.transitivity_avglocal_undirected(mode = 'zero')
+
 	#############################################################################
 	################################### Print ###################################
 	#############################################################################
@@ -232,6 +252,9 @@ class SymmetryAnalyzer:
 		print("Eigen ratio = ", self.eigenRatio)
 		print("Mean epsilon = ", self.meanEpsilon)
 		print("Max epsilon = ", self.maxEpsilon)
+		print("Randic Index = ", self.randic_index)
+		print("Average Path Length = ", self.average_path_length)
+		print("Average Clustering Coefficient = ", self.average_clustering_coefficient)
 	
 	def print_indices_to_file(self, fileName):
 		with open(fileName, 'w') as filehandle:
@@ -247,3 +270,6 @@ class SymmetryAnalyzer:
 			filehandle.writelines("Sum of degrees,%s\n" % self.sumDegrees)
 			filehandle.writelines("Vertex connectivity,%s\n" % self.vertex_connectivity)
 			filehandle.writelines("Edge connectivity,%s\n" % self.edge_connectivity)
+			filehandle.writelines("Randic Index,%s\n" % self.randic_index)
+			filehandle.writelines("Average Path Length,%s\n" % self.average_path_length)
+			filehandle.writelines("Average Clustering Coefficient,%s\n" % self.average_clustering_coefficient)
