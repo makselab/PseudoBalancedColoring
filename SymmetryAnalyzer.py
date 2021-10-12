@@ -29,6 +29,7 @@ class SymmetryAnalyzer:
 		self.sectors = self.get_sectors_from_permutations(self.permutations)
 		self.nodes["Sector"] = self.get_assigned_sectors(self.sectors, self.ig_graph)
 		self.nodes["Orbit"] = self.nodes["Sector"].astype(str) + "_" + self.nodes["Orbit"].astype(str)
+		self.nodes = self.nodes.sort_values(by = ["Sector", "Orbit"])
 		
 		self.NormalSubgroups = [NormalSubgroup(self.ig_graph, self.sectors[i],
 											   self.get_permutations_on_sector_id(self.permutations,
@@ -206,9 +207,7 @@ class SymmetryAnalyzer:
 	################################### Print ###################################
 	#############################################################################
 	def print_all_info(self):
-		nodes = self.nodes.sort_values(by = ["Sector", "Orbit"])
 		print(self.nodes)
-		
 		self.print_indices()
 		print()
 		self.print_normal_subgroups()
@@ -238,8 +237,7 @@ class SymmetryAnalyzer:
 			NormalSubgroup.print_raw_permutations_to_file(fileName)
 	
 	def print_nodes_to_file(self, fileName):
-		nodes = self.nodes.sort_values(by = ["Sector", "Orbit"])
-		nodes.to_csv(fileName, index = False)
+		self.nodes.to_csv(fileName, index = False)
 	
 	def print_edges_to_file(self, fileName):
 		edges = self.edges
