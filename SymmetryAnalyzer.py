@@ -21,6 +21,7 @@ class SymmetryAnalyzer:
 
 		self.permutations = [combinatorics.Permutation(generator) for generator in self.generators]
 
+		# create nodes, put label and orbit information there along with IP output if present
 		self.nodes = pd.DataFrame({"Id": self.ig_graph.vs["name"],
                                    "Label": self.ig_graph.vs["name"],
 								   "Orbit": orbits})
@@ -29,6 +30,7 @@ class SymmetryAnalyzer:
 			self.nodes["IPColor"] = list(nodes["IPColor"])
 			if "Fixed" in nodes.columns:
 				self.nodes["Fixed"] = list(nodes["Fixed"])
+		self.nodes = self.nodes.sort_index()
 	
 	def decompose(self):
 		self.sectors = self.get_sectors_from_permutations(self.permutations)
