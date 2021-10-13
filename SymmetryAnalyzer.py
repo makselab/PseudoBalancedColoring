@@ -7,7 +7,7 @@ from collections import defaultdict
 from NormalSubgroup import *
 
 class SymmetryAnalyzer:
-	def __init__(self, edges, directed = False):
+	def __init__(self, edges, nodes = None, directed = False):
 		self.edges = edges
 		
 		self.ig_graph = ig.Graph.TupleList(self.edges[["Source", "Target", "Color"]].itertuples(index = False),
@@ -20,10 +20,15 @@ class SymmetryAnalyzer:
 				sys.exit()
 
 		self.permutations = [combinatorics.Permutation(generator) for generator in self.generators]
-		
+
 		self.nodes = pd.DataFrame({"Id": self.ig_graph.vs["name"],
                                    "Label": self.ig_graph.vs["name"],
 								   "Orbit": orbits})
+		self.nodes = self.nodes.sort_values(by = ["Id"])
+		if isinstance(nodes, pd.DataFrame):
+			self.nodes["IPColor"] = list(nodes["IPColor"])
+			if "Fixed" in nodes.columns:
+				self.nodes["Fixed"] = list(nodes["Fixed"])
 	
 	def decompose(self):
 		self.sectors = self.get_sectors_from_permutations(self.permutations)

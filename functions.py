@@ -9,10 +9,19 @@ from SymmetryAnalyzer import SymmetryAnalyzer
 def parseMIPOutputFile(inputFile):
 	inputData = pd.read_table(inputFile, sep = "\n", header = None, names = ["Data"])
 	
-	#nodes = inputData.loc[(np.flatnonzero(inputData['Data'] == "Node,Color")[0] + 1):
-	#					  (np.flatnonzero(inputData['Data'] == "Edges added")[0] - 1)]
-	#nodes = nodes['Data'].str.split(",", expand = True)
-	#self.nodes = nodes.rename(columns={0: "Name", 1: "Color"})
+	nodes = inputData.loc[(np.flatnonzero(inputData['Data'] == "Node,Color")[0] + 1):
+						  (np.flatnonzero(inputData['Data'] == "Edges added")[0] - 1)]
+	nodes = nodes['Data'].str.split(",", expand = True)
+	nodes = nodes.rename(columns={0: "Id", 1: "IPColor"})
+	nodes = nodes.sort_values(by = ["Id"])
+
+	fixedFilePos = int(np.flatnonzero(inputData['Data'] == "Fixed File") + 1)
+	if (fixedFilePos < inputData.shape[0]):
+		fixed = inputData.loc[fixedFilePos:inputData.shape[0]]
+		fixed = fixed['Data'].str.split(" ", expand = True)
+		nodes["Fixed"] = nodes["Id"].isin(list(fixed[0]))
+	else:
+		nodes["Fixed"] = False
 	
 	originalEdges = inputData.loc[(np.flatnonzero(inputData['Data'] == "Input File")[0] + 2):
 								  (np.flatnonzero(inputData['Data'] == "Fixed File")[0] - 1)]
@@ -34,7 +43,7 @@ def parseMIPOutputFile(inputFile):
 		edges = pd.concat([originalEdges, repairedEdges])
 	else:
 		edges = originalEdges
-	return(edges)
+	return(nodes, edges)
 
 def readEdgeFile(inputFile, sep = "\t", header = None):
 	edges = pd.read_table(inputFile, sep = sep, header = header)
@@ -47,16 +56,16 @@ def readEdgeFile(inputFile, sep = "\t", header = None):
 
 def runFile(inputFile):
 	print("Running ", inputFile)
-	edges = parseMIPOutputFile(inputFile)
-	symmetryAnalyzer = SymmetryAnalyzer(edges)
+	nodes, edges = parseMIPOutputFile(inputFile)
+	symmetryAnalyzer = SymmetryAnalyzer(edges, nodes = nodes)
 	symmetryAnalyzer.decompose()
 	symmetryAnalyzer.calculate_indices()
 	symmetryAnalyzer.print_all_info()
 
 def runFile_to_output(inputFile, outputPrefix):
 	print("Running ", inputFile)
-	edges = parseMIPOutputFile(inputFile)
-	symmetryAnalyzer = SymmetryAnalyzer(edges)
+	nodes, edges = parseMIPOutputFile(inputFile)
+	symmetryAnalyzer = SymmetryAnalyzer(edges, nodes = nodes)
 	symmetryAnalyzer.decompose()
 	symmetryAnalyzer.calculate_indices()
 	symmetryAnalyzer.print_all_info_to_files(outputPrefix)

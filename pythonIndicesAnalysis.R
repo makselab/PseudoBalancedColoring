@@ -18,6 +18,29 @@ getIndexFiles <- function(directoryName, prefix) {
   return(files)
 }
 
+makePlot <- function(nodes, edges, coordinates, pdfname) {
+  nodes = merge(nodes, coordinates)
+  
+  edges$ColorCode = gsub("Original", "#000000", edges$Color)
+  edges$ColorCode = gsub("Repaired", "#FF0000", edges$ColorCode)
+  
+  graph = graph_from_edgelist(as.matrix(edges[, 1:2]), directed = F)
+  nodes$Id = factor(nodes$Id, levels = as.character(V(graph)$name))
+  nodes = arrange(nodes, Id)
+  
+  pdf(pdfname, width = 10, height = 10)
+  plot(graph,
+       layout = as.matrix(nodes[, c("x", "y")]),
+       vertex.size = 15,
+       vertex.color = nodes$IPColor,
+       edge.width = 2,
+       edge.color = edges$ColorCode,
+       vertex.label.cex = 1,
+       vertex.label.color = "#000000"
+  )
+  dev.off()
+}
+  
 getIndices <- function(files) {
   indices = foreach(i = 1:length(files), .combine = rbind) %do% {
     ncolors = as.integer(gsub(".*_([0-9]+)_indices.txt", "\\1", files[i]))
@@ -41,12 +64,13 @@ getIndices <- function(files) {
     
     # add colors to node file
     nodes = read.table(paste0(gsub("_indices.txt", "_nodes.csv", files[i])), stringsAsFactors = F, sep = ",", header = T)
-    nodes = nodes[, c("Id", "Label", "Sector", "Orbit")]
     colnames(balancedColoring)[1] = "Id"
     nodes = merge(nodes, balancedColoring)
     nodes = arrange(nodes, Sector, Orbit)
-    nodes = nodes[, c("Id", "Label", "Sector", "Orbit", "Color")]
+    nodes = nodes[, c("Id", "Label", "Sector", "Orbit", "Color", "IPColor", "Fixed")]
     write.table(nodes, paste0(gsub("_indices.txt", "_nodes.csv", files[i])), sep = ",", row.names = F, quote = F)
+    
+    makePlot(nodes, edgeList, coordinates, gsub("_indices.txt", ".pdf", files[i]))
     
     return(index)
   }
@@ -93,8 +117,16 @@ directoryName = "/home/ian/Dropbox (City College)/Research/PhD work/shared folde
 # directoryName = "HUBS-ONLY-NETWORKS"
 # directoryName = "/home/ian/Dropbox (City College)/Research/PhD work/shared folders/PROTEIN-FOLDING/COLLABORATION-ANALYSIS/DAVID-FRANCESCO/FINAL-ANALYSIS-MAY-2021/DATA/INTEGER-PROGRAM-COST-ONE-OVER-MAX-DEGREE"
 # directoryName = "/home/ian/Dropbox (City College)/Research/PhD work/shared folders/PROTEIN-FOLDING/COLLABORATION-ANALYSIS/DAVID-FRANCESCO/FINAL-ANALYSIS-MAY-2021/DATA/INTEGER-PROGRAM-COST-ONE-OVER-SUM-DEGREES"
+directoryName = "/home/ian/Dropbox (City College)/Research/PhD work/shared folders/PROTEIN-FOLDING/COLLABORATION-ANALYSIS/DAVID-FRANCESCO/FINAL-ANALYSIS-MAY-2021/DATA/INTEGER-PROGRAM-COST-ONE-OVER-MULTI-DEGREE"
 prefix = "c_bw_no"
 manualIndexFile = "/home/ian/Dropbox (City College)/Research/PhD work/shared folders/PROTEIN-FOLDING/COLLABORATION-ANALYSIS/DAVID-FRANCESCO/FINAL-ANALYSIS-MAY-2021/CODE/manualRepairIndices"
+if(prefix == "c_fw_no") {
+  coordinates = read.table("/home/ian/Dropbox (City College)/Research/PhD work/shared folders/PROTEIN-FOLDING/COLLABORATION-ANALYSIS/DAVID-FRANCESCO/FINAL-ANALYSIS-MAY-2021/DATA/Forward_gap_coordinates.txt", header = T, stringsAsFactors = F)
+} else {
+  coordinates = read.table("/home/ian/Dropbox (City College)/Research/PhD work/shared folders/PROTEIN-FOLDING/COLLABORATION-ANALYSIS/DAVID-FRANCESCO/FINAL-ANALYSIS-MAY-2021/DATA/Backward_gap_coordinates.txt", header = T, stringsAsFactors = F)
+}
+colnames(coordinates)[1] = "Id"
+
 # variables = c("Number of Trivial Colors", "Number of Non-Trivial Colors", "Number of Nodes in Non-Trivial Colors", "Normalized Fiedler Value", "Mean epsilon", "Critical Eigenvalue Shifted Adjacency")
 variables = c("Number of Non-Trivial Colors", "Number of Trivial Colors", "Number of Nodes in Non-Trivial Colors", "Normalized Fiedler Value", "Max epsilon")
 
@@ -103,28 +135,37 @@ indices = getIndices(files)
 manualIndices = getManualIndices(manualIndexFile, prefix)
 indices = filterIndices(indices, variables)
 manualIndices = filterIndices(manualIndices, variables)
+# 
+# plotData = 
+#   ggplot(data = indices) +
+#     geom_hline(data = manualIndices, aes(yintercept = V2), color = "red", size = 2) +
+#     {if(prefix == "fw") geom_vline(xintercept = 9, color = "red", size = 2)} +
+#     {if(prefix == "fw") geom_vline(xintercept = 9, color = "green", size = 2, linetype = "dashed")} +
+#     {if(prefix == "bw") geom_vline(xintercept = 8, color = "red", size = 2)} +
+#     {if(prefix == "bw") geom_vline(xintercept = 11, color = "green", size = 2)} +
+#     {if(prefix == "bw") geom_vline(xintercept = 12, color = "green", size = 2)} +
+#     {if(prefix == "bw") geom_rect(aes(xmin = 11, xmax = 12, ymin = -Inf, ymax = Inf), fill = "palegreen", alpha = 0.11)} +
+#     geom_point(mapping = aes(x = V3, y = V2), size = 8) +
+#     geom_line(mapping = aes(x = V3, y = V2), size = 2) +
+#     facet_wrap(~V1, scales = "free", ncol = 1) +
+#     theme_bw() +
+#     theme(axis.text = element_text(size = 25),
+#           axis.title = element_text(size = 40, face = "bold"),
+#           strip.text = element_text(size = 35, face = "bold"),
+#           panel.spacing = unit(1.5, "lines"),
+#           axis.title.x = element_text(vjust = 0.5, hjust = 1),
+#           panel.grid.major = element_line(colour = "black")) +
+#     scale_x_continuous(breaks = 1:17, name = "Number of colors in a repaired graph") +
+#     scale_y_continuous(name = element_blank())
+# plotData
+# ggsave("IndicesSummary.png", plot = plotData, width = 1, height = 2, scale = 10)
+# # ggsave("IndicesSummary.png", plot = plotData, width = 5, height = 2.5, scale = 8)
 
-plotData = 
-  ggplot(data = indices) +
-    geom_hline(data = manualIndices, aes(yintercept = V2), color = "red", size = 2) +
-    {if(prefix == "fw") geom_vline(xintercept = 9, color = "red", size = 2)} +
-    {if(prefix == "fw") geom_vline(xintercept = 9, color = "green", size = 2, linetype = "dashed")} +
-    {if(prefix == "bw") geom_vline(xintercept = 8, color = "red", size = 2)} +
-    {if(prefix == "bw") geom_vline(xintercept = 11, color = "green", size = 2)} +
-    {if(prefix == "bw") geom_vline(xintercept = 12, color = "green", size = 2)} +
-    {if(prefix == "bw") geom_rect(aes(xmin = 11, xmax = 12, ymin = -Inf, ymax = Inf), fill = "palegreen", alpha = 0.11)} +
-    geom_point(mapping = aes(x = V3, y = V2), size = 8) +
-    geom_line(mapping = aes(x = V3, y = V2), size = 2) +
-    facet_wrap(~V1, scales = "free", ncol = 1) +
-    theme_bw() +
-    theme(axis.text = element_text(size = 25),
-          axis.title = element_text(size = 40, face = "bold"),
-          strip.text = element_text(size = 35, face = "bold"),
-          panel.spacing = unit(1.5, "lines"),
-          axis.title.x = element_text(vjust = 0.5, hjust = 1),
-          panel.grid.major = element_line(colour = "black")) +
-    scale_x_continuous(breaks = 1:17, name = "Number of colors in a repaired graph") +
-    scale_y_continuous(name = element_blank())
-plotData
-ggsave("IndicesSummary.png", plot = plotData, width = 1, height = 2, scale = 10)
-# ggsave("IndicesSummary.png", plot = plotData, width = 5, height = 2.5, scale = 8)
+ggplot(data = indices) +
+  geom_hline(data = manualIndices, aes(yintercept = V2), color = "red", size = 2) +
+  geom_point(mapping = aes(x = V4, y = V2), size = 8) +
+  geom_line(mapping = aes(x = V4, y = V2), size = 2) +
+  facet_wrap(~V1, scales = "free", ncol = 1) +
+  scale_x_continuous(breaks = 1:17, name = "Number of colors in a repaired graph") +
+  theme_bw()
+      
