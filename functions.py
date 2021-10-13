@@ -62,8 +62,9 @@ def runFile(inputFile):
 	symmetryAnalyzer.calculate_indices()
 	symmetryAnalyzer.print_all_info()
 
-def runFile_to_output(inputFile, outputPrefix):
-	print("Running ", inputFile)
+def runFile_to_output(inputFile, outputPrefix, printFileName = False):
+	if printFileName == True:
+		print("Running ", inputFile)
 	nodes, edges = parseMIPOutputFile(inputFile)
 	symmetryAnalyzer = SymmetryAnalyzer(edges, nodes = nodes)
 	symmetryAnalyzer.decompose()
@@ -71,6 +72,7 @@ def runFile_to_output(inputFile, outputPrefix):
 	symmetryAnalyzer.print_all_info_to_files(outputPrefix)
 
 def runFolder(folderToRun, outputFolder):
+	print("Running ", folderToRun)
 	files = os.listdir(folderToRun)
 	files = [file for file in files if re.search(r"\.[a-z]{3}$", file)]
 	
