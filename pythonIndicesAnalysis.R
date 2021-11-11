@@ -117,8 +117,8 @@ directoryName = "/home/ian/Dropbox (City College)/Research/PhD work/shared folde
 # directoryName = "HUBS-ONLY-NETWORKS"
 # directoryName = "/home/ian/Dropbox (City College)/Research/PhD work/shared folders/PROTEIN-FOLDING/COLLABORATION-ANALYSIS/DAVID-FRANCESCO/FINAL-ANALYSIS-MAY-2021/DATA/INTEGER-PROGRAM-COST-ONE-OVER-MAX-DEGREE"
 # directoryName = "/home/ian/Dropbox (City College)/Research/PhD work/shared folders/PROTEIN-FOLDING/COLLABORATION-ANALYSIS/DAVID-FRANCESCO/FINAL-ANALYSIS-MAY-2021/DATA/INTEGER-PROGRAM-COST-ONE-OVER-SUM-DEGREES"
-directoryName = "/home/ian/Dropbox (City College)/Research/PhD work/shared folders/PROTEIN-FOLDING/COLLABORATION-ANALYSIS/DAVID-FRANCESCO/FINAL-ANALYSIS-MAY-2021/DATA/INTEGER-PROGRAM-COST-ONE-OVER-MULTI-DEGREE"
-prefix = "c_bw_no"
+# directoryName = "/home/ian/Dropbox (City College)/Research/PhD work/shared folders/PROTEIN-FOLDING/COLLABORATION-ANALYSIS/DAVID-FRANCESCO/FINAL-ANALYSIS-MAY-2021/DATA/INTEGER-PROGRAM-COST-ONE-OVER-MULTI-DEGREE"
+prefix = "c_fw_no"
 manualIndexFile = "/home/ian/Dropbox (City College)/Research/PhD work/shared folders/PROTEIN-FOLDING/COLLABORATION-ANALYSIS/DAVID-FRANCESCO/FINAL-ANALYSIS-MAY-2021/CODE/manualRepairIndices"
 if(prefix == "c_fw_no") {
   coordinates = read.table("/home/ian/Dropbox (City College)/Research/PhD work/shared folders/PROTEIN-FOLDING/COLLABORATION-ANALYSIS/DAVID-FRANCESCO/FINAL-ANALYSIS-MAY-2021/DATA/Forward_gap_coordinates.txt", header = T, stringsAsFactors = F)
@@ -135,18 +135,18 @@ indices = getIndices(files)
 manualIndices = getManualIndices(manualIndexFile, prefix)
 indices = filterIndices(indices, variables)
 manualIndices = filterIndices(manualIndices, variables)
-# 
-# plotData = 
+
+# plotData =
 #   ggplot(data = indices) +
 #     geom_hline(data = manualIndices, aes(yintercept = V2), color = "red", size = 2) +
-#     {if(prefix == "fw") geom_vline(xintercept = 9, color = "red", size = 2)} +
-#     {if(prefix == "fw") geom_vline(xintercept = 9, color = "green", size = 2, linetype = "dashed")} +
-#     {if(prefix == "bw") geom_vline(xintercept = 8, color = "red", size = 2)} +
-#     {if(prefix == "bw") geom_vline(xintercept = 11, color = "green", size = 2)} +
-#     {if(prefix == "bw") geom_vline(xintercept = 12, color = "green", size = 2)} +
-#     {if(prefix == "bw") geom_rect(aes(xmin = 11, xmax = 12, ymin = -Inf, ymax = Inf), fill = "palegreen", alpha = 0.11)} +
-#     geom_point(mapping = aes(x = V3, y = V2), size = 8) +
-#     geom_line(mapping = aes(x = V3, y = V2), size = 2) +
+#     {if(prefix == "c_fw_no") geom_vline(xintercept = 9, color = "red", size = 2)} +
+#     {if(prefix == "c_fw_no") geom_vline(xintercept = 9, color = "green", size = 2, linetype = "dashed")} +
+#     {if(prefix == "c_bw_no") geom_vline(xintercept = 8, color = "red", size = 2)} +
+#     {if(prefix == "c_bw_no") geom_vline(xintercept = 12, color = "green", size = 2)} +
+#     # {if(prefix == "bw") geom_vline(xintercept = 12, color = "green", size = 2)} +
+#     # {if(prefix == "bw") geom_rect(aes(xmin = 11, xmax = 12, ymin = -Inf, ymax = Inf), fill = "palegreen", alpha = 0.11)} +
+#     geom_point(mapping = aes(x = V4, y = V2), size = 8) +
+#     geom_line(mapping = aes(x = V4, y = V2), size = 2) +
 #     facet_wrap(~V1, scales = "free", ncol = 1) +
 #     theme_bw() +
 #     theme(axis.text = element_text(size = 25),
@@ -158,8 +158,8 @@ manualIndices = filterIndices(manualIndices, variables)
 #     scale_x_continuous(breaks = 1:17, name = "Number of colors in a repaired graph") +
 #     scale_y_continuous(name = element_blank())
 # plotData
-# ggsave("IndicesSummary.png", plot = plotData, width = 1, height = 2, scale = 10)
-# # ggsave("IndicesSummary.png", plot = plotData, width = 5, height = 2.5, scale = 8)
+# ggsave("/home/ian/Dropbox (City College)/Research/PhD work/shared folders/PROTEIN-FOLDING/COLLABORATION-ANALYSIS/DAVID-FRANCESCO/FINAL-ANALYSIS-MAY-2021/IndicesSummary.png", plot = plotData, width = 1, height = 2, scale = 10)
+# # # ggsave("IndicesSummary.png", plot = plotData, width = 5, height = 2.5, scale = 8)
 
 ggplot(data = indices) +
   geom_hline(data = manualIndices, aes(yintercept = V2), color = "red", size = 2) +
