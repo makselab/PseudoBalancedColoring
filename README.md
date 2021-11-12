@@ -1,6 +1,8 @@
 # SymmetryGroupFactorization
 
-Author: **Ian Leifer, Levich Institute and Physics Department, City College of New York, New York, NY 10031**
+Authors:
+- Decomposition code: **Ian Leifer, Levich Institute and Physics Department, City College of New York, New York, NY 10031**
+- IP code: **David Phillips, Mathematics Department, United States Naval Academy, Annapolis, MD, 21402**
 
 Advisor: **Hernan Makse, Levich Institute and Physics Department, City College of New York, New York, NY 10031**
 
