@@ -1,5 +1,9 @@
 # SymmetryGroupFactorization
 
+Author: **Ian Leifer, Levich Institute and Physics Department, City College of New York, New York, NY 10031**
+
+Advisor: **Hernan Makse, Levich Institute and Physics Department, City College of New York, New York, NY 10031**
+
 .py files contain classes that work with symmetry groups using NAUTY, Sage and SymPy.
 
 "MIPoutputAnalyzer.ipynb" notebook contains some examples of how this analysis can be performed.
