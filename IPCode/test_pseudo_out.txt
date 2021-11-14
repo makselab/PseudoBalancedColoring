@@ -1,0 +1,53 @@
+Edge weight sum: 1.6388888888888888
+Edge weight lower bound: 1.6388888888888888
+Runtime: 0.023213863372802734
+Node,Color
+h,2
+a,2
+b,1
+c,1
+g,0
+e,0
+d,1
+f,0
+
+Edges added
+d,h,2,1.0
+f,a,2,1.0
+e,a,2,1.0
+b,h,2,1.0
+h,b,1,1.0
+a,g,0,1.0
+d,a,2,1.0
+g,a,2,1.0
+h,c,1,1.0
+h,d,1,1.0
+a,e,0,1.0
+c,h,2,1.0
+a,d,1,1.0
+a,f,0,1.0
+
+Input File
+8
+a b 1
+a c 1
+b c 1
+b d 1
+c d 1
+b e 1
+c f 1
+d g 1
+e f 1
+e g 1
+f g 1
+e h 1
+f h 1
+g h 1
+
+Fixed File
+b 1
+c 1
+d 1
+e 2
+f 2
+g 2

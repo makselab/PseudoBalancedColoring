@@ -1,18 +1,54 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Mon Mar  1 20:05:23 2021
+This is documentation for the pseudo partition integer program file titled
+pseudo_partition.py
+discussed in the paper of Leiffer, Phillips, Sorrentino, and Makse, 
+"Symmetry-driven link prediction in networks through pseudobalanced coloring 
+optimization"
 
-@author: phillips
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-Version 4:
-    conversion to gurobipy
+Any questions about this code should be directed to the code author:
+David Phillips, U.S. Naval Academy,
+dphillip@usna.edu
+However, responses and assistance is not guaranteed.
+
+To use this program as is, the Gurobi solver and python API must also be 
+installed. Gurobi (www.gurobi.com) which is freely available for 
+academics. Please see their website for further information. 
+
+The basic call to use is
+    RWmilp(graph_path,num_colors,fixedflag,fixedpath,output_path,run_limit)
     
-Version 5:
-    allows for an initial solution
+    where
+    graph_path is the path to the file to the graph
+    num_colors is the number of colors
+    fixedflag is a boolean indicating whether file with nodes fixed in the
+    same color partition exists or not
+    fixedpath is the path to the fixed file (ignored if fixedflag=False)
+    outputpath is the path to the outputs
+    run_limit is the maximum runtime in seconds
     
-Version 6:
-    allows for a weighted objective
+Return values are as follows.
+    pmip is the model structure used by gurobi
+    nc_sol is the node-color solution
+    re_sol is the repair-edge solutions
+    bad_sol is a boolean indicating whether some error occured
+
+A sample call is 
+pmip_test,nc_sol_test,re_sol_test,bad_sol_test = \
+RWmilp('test_pseudo.graph.txt',3,True,\
+       'test_pseudo_fixed.txt','test_pseudo_out.txt',1000)
+These  and other sample calls are on line 382 below.
+
+To change the objective, comment in whichever is desired on lines 240-251.
+The current objective is the Randic index with parameter alpha = -1, i.e.,
+the sum of the inverse products of node degree over the edges of the graph.    
+    
+    
 """
 
 import gurobipy as gp
@@ -30,7 +66,6 @@ def readdata(fname,NumColors,FixedFlag,fixedfile):
     
     GraphData = pd.read_csv(fname,sep=' ',index_col=[0,1],header=None,skiprows=1)
     
-    
     EdgeDictRaw = GraphData.to_dict()[2]
     
     #remove duplicates
@@ -40,10 +75,8 @@ def readdata(fname,NumColors,FixedFlag,fixedfile):
             tempedgelist.append((i,j))
             
     EdgeDict = {(i,j):EdgeDictRaw[(i,j)] for (i,j) in tempedgelist}
-    
-    Edges,EdgeWeights = gp.multidict(EdgeDict)
 
-    
+    Edges,EdgeWeights = gp.multidict(EdgeDict)
 
     Nodes = []
     for tup in Edges:
@@ -85,8 +118,7 @@ def readdata(fname,NumColors,FixedFlag,fixedfile):
 
     ##create a MIP
 def CreatePMIP(Nodes,Colors,NodePairs,FixedFlag,fdict,NotEdges,M,EdgeWeights,\
-               env, InitialFlag=False,init_nc=[],init_sc=[],init_re=[],\
-                   Wt_ObjFlag=False,ObjWeights=[]):
+               env, InitialFlag=False,init_nc=[],init_sc=[],init_re=[]):
     
     
     pmip = gp.Model(name='Pseudo',env=env)
@@ -201,10 +233,25 @@ def CreatePMIP(Nodes,Colors,NodePairs,FixedFlag,fdict,NotEdges,M,EdgeWeights,\
     else:
         fixedcons=[]
 
-    if Wt_ObjFlag:
-        obj = gp.quicksum(ObjWeights[p,q,c]*repair_edges[p,q,c] for (p,q) in NotEdges for c in Colors)
-    else:   
-        obj = gp.quicksum(repair_edges[p,q,c] for (p,q) in NotEdges for c in Colors) 
+    #HACK: this is not controlled by a flag
+    #Calculate the degrees of each node
+    degree_dict = {}
+    for p in Nodes:
+        degree_dict[p] = sum(EdgeWeights[i,j] for (i,j) in EdgeWeights.keys() if i==p or j==p)
+
+#comment in desired objective
+
+#    obj = gp.quicksum((1/max(degree_dict[p],degree_dict[q]))*repair_edges[p,q,c] for (p,q) in NotEdges for c in Colors) 
+
+#sum objective
+#    obj = gp.quicksum((1/(degree_dict[p]+degree_dict[q]))*repair_edges[p,q,c] for (p,q) in NotEdges for c in Colors)
+
+#product objective
+    obj = gp.quicksum((1/(degree_dict[p]*degree_dict[q]))*repair_edges[p,q,c] for (p,q) in NotEdges for c in Colors)
+
+#normal objective
+#    obj = gp.quicksum(repair_edges[p,q,c] for (p,q) in NotEdges for c in Colors)
+
     
     pmip.setObjective(obj,GRB.MINIMIZE)
 
@@ -246,7 +293,7 @@ def UpdateRepairEdges(repair_edges,NotEdges,Colors):
 
 
 def run_one_pmip(fname,NumColors,FixedFlag,fixedfile,timelimit,InitFlag,\
-                 init_nc,init_sc,init_re,Wt_ObjFlag=False,ObjWeights=[]):
+                                              init_nc,init_sc,init_re):
 
     #create the inputs
     Nodes,NodePairs,Colors,Edges,EdgeWeights,NotEdges,fdict,NE_unique,M = \
@@ -261,14 +308,15 @@ def run_one_pmip(fname,NumColors,FixedFlag,fixedfile,timelimit,InitFlag,\
         colors_agree_pq,colors_agree_qp,only_correct_repairs,\
         equal_repair_edges = \
         CreatePMIP(Nodes,Colors,NodePairs,FixedFlag,fdict,NotEdges,M,\
-                   EdgeWeights,env,InitFlag,init_nc,init_sc,init_re,
-                   Wt_ObjFlag,ObjWeights)
+                   EdgeWeights,env,InitFlag,init_nc,init_sc,init_re)
         
     #set the time limit
     pmip.setParam("TimeLimit", timelimit)
 
     #optimize
     pmip.optimize()
+
+    
 
     #find the solution
     nodecolor_sol,bad_sol = UpdateNodeColor(nodecolor,Nodes,Colors)
@@ -277,11 +325,13 @@ def run_one_pmip(fname,NumColors,FixedFlag,fixedfile,timelimit,InitFlag,\
     return pmip,nodecolor_sol,repair_edges_sol,bad_sol
 
 
-def write_one_solution(fname,nc_sol,re_sol,obj,lb):
+def write_one_solution(fname,nc_sol,re_sol,obj,lb,infile,FixedFlag=False,\
+                       fixedfile="dummy",runtime=0):
     f = open(fname,"w")
     
     print(f"Edge weight sum: {obj}",file=f)    
     print(f"Edge weight lower bound: {lb}",file=f)
+    print(f"Runtime: {runtime}",file=f)
     print("Node,Color",file=f)    
     
     
@@ -300,6 +350,21 @@ def write_one_solution(fname,nc_sol,re_sol,obj,lb):
         v = repair[3]
         print(f"{i},{j},{c},{v}",file=f)
 
+    #write the input file
+    print("\nInput File",file=f)
+    inpf = open(infile,"r")
+    for line in inpf:
+        f.write(line)
+    inpf.close()
+
+    #write the fixed file
+    if (FixedFlag):
+        print("\nFixed File",file=f)
+        fixedf=open(fixedfile,"r")
+        for line in fixedf:
+            f.write(line)
+        fixedf.close()
+
     f.close()
     
 #runs one MILP and then writes the result to a file that incorporates
@@ -311,31 +376,22 @@ def RWmilp(fname,NumColors,FixedFlag,fixedfile,outpath,timelimit,\
                                               init_nc,init_sc,init_re)
     
 
-    write_one_solution(outpath,nc_sol,re_sol,pmip.ObjVal,pmip.ObjBound)
+    write_one_solution(outpath,nc_sol,re_sol,pmip.ObjVal,pmip.ObjBound,\
+                       fname,FixedFlag,fixedfile,pmip.Runtime)
     
     return pmip,nc_sol,re_sol,bad_sol
 
-##main calls
+##sample calls
 
 #pmip_test,nc_sol_test,re_sol_test,bad_sol_test = \
 #RWmilp('test_pseudo.graph.txt',3,True,\
 #       'test_pseudo_fixed.txt','test_pseudo_out.txt',1000)
 
-#RWmilp('test_pseudo_comp1.graph.txt',1,False,\
-#       'no.txt','test_comp1_c1_out.txt',1000)
 
 
-pmip_test2,nc_sol_test2,re_sol_test2,bad_sol_test2 = RWmilp('bw_fw_data/fw_gap_jn.txt',\
-                                                      9,True,\
-                                                      'bw_fw_data/old_fw_gap_jn_balanced_nodes.txt',
-                                                      'test_fw_9.out.txt',3600)
+#pmip_test,nc_sol_test,re_sol_test,bad_sol_test = \
+#   RWmilp('fw_gap_jn.txt',9,True,\
+#       'fw_gap_jn_balanced_fixed_nodes.txt','fw_9_out.txt',1000)
 
+   
 
-#for i in range(1,10):
-#    ian_name="ian"+str(i)+".out.txt"
-#    pmip_test2,nc_sol_test2,re_sol_test2,bad_sol_test2 = RWmilp('iantest.txt',\
-#                                                      i,False,\
-#                                                      'bw_fw_data/old_fw_gap_jn_balanced_nodes.txt',
-#                                                      ian_name,3600)
-
- 
